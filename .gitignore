@@ -1,0 +1,12 @@
+# Ignore environment files
+.env
+
+# Ignore Composer vendor directory
+/vendor/
+
+# Ignore temp uploads folder if used
+/uploads/
+
+/*.log
+*.pem
+*.key

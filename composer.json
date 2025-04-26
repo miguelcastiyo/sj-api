@@ -1,0 +1,19 @@
+{
+    "name": "yourname/sushi-journal-api",
+    "description": "Backend APIs for the Sushi Journal web app",
+    "type": "project",
+    "require": {
+      "vlucas/phpdotenv": "^5.5",        
+      "aws/aws-sdk-php": "^3.300" 
+    },
+    "autoload": {
+      "psr-4": {
+        "App\\": "lib/"
+      }
+    },
+    "scripts": {
+      "start": "php -S localhost:8000 -t public"
+    },
+    "license": "MIT"
+  }
+  
