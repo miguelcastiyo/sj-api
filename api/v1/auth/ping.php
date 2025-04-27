@@ -16,23 +16,25 @@ if (!$sessionKey) {
 $sessionManager = new SessionManager($mysqli);
 
 try {
+    // Validate the session key
     $userId = $sessionManager->validateSession($sessionKey);
 
-    if (!$userId) {
+    if ($userId) {
+        echo json_encode([
+            "success" => true,
+            "key" => $sessionKey,
+            "time_remaining" => $sessionManager->getSessionTimeRemaining($sessionKey),
+            "expires_at" => $sessionManager->getSessionExpiry($sessionKey),
+            "created_at" => $sessionManager->getSessionCreatedAt($sessionKey),
+            "status" => $sessionManager->getSessionStatus($sessionKey),
+            "user" => $sessionManager->getUserDetails($userId)
+        ]);
+    } else {
         http_response_code(401);
         echo json_encode(["error" => "Invalid or expired session"]);
-        exit;
     }
-
-    //Session valid — refresh expiration
-    $sessionManager->refreshSession($sessionKey);
-
-    echo json_encode([
-        "success" => true,
-        "message" => "Session refreshed successfully"
-    ]);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(["error" => "Error during refresh: " . $e->getMessage()]);
+    echo json_encode(["error" => "Error checking session: " . $e->getMessage()]);
 }
 ?>
