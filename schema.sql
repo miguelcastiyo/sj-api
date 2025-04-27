@@ -1,4 +1,4 @@
--- Create Users Table
+-- USERS
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   provider_sub VARCHAR(255) NOT NULL UNIQUE,
@@ -7,20 +7,64 @@ CREATE TABLE IF NOT EXISTS users (
   display_name VARCHAR(100) NOT NULL,
   group_id INT DEFAULT NULL,
   role VARCHAR(50) DEFAULT 'member',
-  joined_at BIGINT DEFAULT UNIX_TIMESTAMP(),
-  mod_at BIGINT DEFAULT UNIX_TIMESTAMP(),
+  joined_at BIGINT NOT NULL,
+  mod_at BIGINT NOT NULL,
   last_login BIGINT DEFAULT 0,
   auth VARCHAR(50) DEFAULT 'google',
   settings JSON DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Create Sessions Table
+-- SESSIONS
 CREATE TABLE IF NOT EXISTS sessions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   session_key CHAR(64) NOT NULL UNIQUE,
   user_id INT NOT NULL,
-  created_at BIGINT DEFAULT UNIX_TIMESTAMP(),
+  created_at BIGINT NOT NULL,
   expires_at BIGINT NOT NULL,
   status TINYINT DEFAULT 1,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ROLLS
+CREATE TABLE IF NOT EXISTS rolls (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  restaurant_name VARCHAR(255) NOT NULL,
+  restaurant_google_place_id VARCHAR(255) DEFAULT NULL,
+  roll_name VARCHAR(255) NOT NULL,
+  notes TEXT DEFAULT NULL,
+  rating DECIMAL(3,2) NOT NULL, -- allows scores like 8.50, 9.25, etc.
+  created_at BIGINT NOT NULL,
+  updated_at BIGINT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ROLL PHOTOS
+CREATE TABLE IF NOT EXISTS roll_photos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  roll_id INT NOT NULL,
+  user_id INT NOT NULL,
+  photo_url VARCHAR(500) NOT NULL,
+  created_at BIGINT NOT NULL,
+  FOREIGN KEY (roll_id) REFERENCES rolls(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- INGREDIENT TAGS
+CREATE TABLE IF NOT EXISTS ingredient_tags (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE,
+  status TINYINT DEFAULT 1,
+  created_by_user_id INT DEFAULT NULL,
+  created_at BIGINT NOT NULL,
+  FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ROLL INGREDIENTS (linking rolls to ingredient tags)
+CREATE TABLE IF NOT EXISTS roll_ingredients (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  roll_id INT NOT NULL,
+  ingredient_tag_id INT NOT NULL,
+  FOREIGN KEY (roll_id) REFERENCES rolls(id) ON DELETE CASCADE,
+  FOREIGN KEY (ingredient_tag_id) REFERENCES ingredient_tags(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
